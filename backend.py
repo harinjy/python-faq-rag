@@ -7,10 +7,16 @@ from langchain_aws import BedrockLLM
 
 
 def python_index():
+    """
+    Creates and returns a vector store index from a PDF document.
 
+    This function loads a PDF file, creates embeddings using
+    Amazon Bedrock's Titan model, and builds a FAISS vector store index.
+
+    Returns:
+        VectorStoreIndexCreator: An index containing the processed PDF content
+    """
     loader = PyPDFLoader("faq.pdf")
-    documents = loader.load_and_split()
-
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=300,
         chunk_overlap=20,
@@ -32,6 +38,15 @@ def python_index():
 
 
 def query_llm():
+    """
+    Initializes and returns a Bedrock LLM instance using Claude v2.
+
+    Configures the LLM with specific parameters for token generation,
+    temperature, and top_p sampling.
+
+    Returns:
+        BedrockLLM: Configured LLM instance for generating responses
+    """
     llm = BedrockLLM(
         credentials_profile_name="default",
         model_id="anthropic.claude-v2",
@@ -45,5 +60,15 @@ def query_llm():
 
 
 def query_index(index, question):
+    """
+    Queries the vector store index with a given question using the LLM.
+
+    Args:
+        index: The vector store index to query against
+        question (str): The question to be answered
+
+    Returns:
+        str: The generated response from the LLM based on relevant context
+    """
     rag_llm = query_llm()
     return index.query(question=question, llm=rag_llm)
